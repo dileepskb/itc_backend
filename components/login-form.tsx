@@ -14,7 +14,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { useEffect } from "react"
 
 export function LoginForm({
   className,
