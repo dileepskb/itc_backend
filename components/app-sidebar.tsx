@@ -66,6 +66,14 @@ const data = {
           title: "Certificate",
           url: "/dashboard/certificate",
         },
+        {
+          title: "Videos",
+          url: "/dashboard/videos",
+        },
+        {
+          title: "Images",
+          url: "/dashboard/images",
+        },
         
         // {
         //   title: "Settings",
