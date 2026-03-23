@@ -54,7 +54,7 @@ model Student {
 model Marksheet {
   id          Int     @id @default(autoincrement())
   title       String?
-  roll        String 
+  roll        String  @unique
 
   com         Int?
   ms          Int?
