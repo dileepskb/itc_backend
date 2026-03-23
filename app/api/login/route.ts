@@ -11,9 +11,13 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { email, password } = body
 
+
+
     const user = await prisma.user.findUnique({
       where: { email }
     })
+
+
 
     if (!user) {
       return NextResponse.json(
@@ -37,6 +41,8 @@ export async function POST(req: Request) {
       { expiresIn: "7d" }
     )
 
+    console.log("toekn ", token)
+
     return NextResponse.json({
       message: "Login success",
       token,
@@ -49,9 +55,11 @@ export async function POST(req: Request) {
     })
 
   } catch (error) {
-    return NextResponse.json(
-      { error: "Server error" },
-      { status: 500 }
-    )
-  }
+  console.error("LOGIN ERROR:", error) // 👈 terminal me dikhega
+
+  return NextResponse.json(
+    { error: "Server error", details: String(error) },
+    { status: 500 }
+  )
+}
 }

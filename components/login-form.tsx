@@ -1,3 +1,6 @@
+"use client"
+import { useForm } from "react-hook-form"
+import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,6 +24,29 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
    
 
+const { register, handleSubmit } = useForm()
+  const router = useRouter()
+
+
+  const onSubmit = async (data: any) => {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+
+    const result = await res.json()
+
+    if (res.ok) {
+        localStorage.setItem("token", result.token)
+      // ✅ login success
+      router.push("/dashboard")   // 🔥 redirect
+    } else {
+      alert(result.message)
+    }
+  }
 
 
   return (
@@ -33,7 +59,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -42,6 +68,7 @@ export function LoginForm({
                   type="email"
                   placeholder="m@example.com"
                   required
+                  {...register("email")}
                 />
               </Field>
               <Field>
@@ -54,13 +81,13 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input id="password" type="password" required {...register("password")} />
               </Field>
               <Field>
                 <Button type="submit">Login</Button>
-                <Button variant="outline" type="button">
+                {/* <Button variant="outline" type="button">
                   Login with Google
-                </Button>
+                </Button> */}
                 <FieldDescription className="text-center">
                   Don&apos;t have an account? <a href="#">Sign up</a>
                 </FieldDescription>

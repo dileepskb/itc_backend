@@ -1,5 +1,5 @@
 "use client"
-
+import { useRouter } from "next/navigation"
 import {
   Avatar,
   AvatarFallback,
@@ -32,6 +32,15 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+
+
+  const router = useRouter()
+
+  const logout = () => {
+    localStorage.removeItem("token") // 🔥 remove token
+    router.push("/login")
+  }
+
 
   return (
     <SidebarMenu>
@@ -98,7 +107,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={logout}>
               <LogOutIcon
               />
               Log out
