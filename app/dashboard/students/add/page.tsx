@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
+import { useRef, useState } from "react"
 
 const formSchema = z.object({
   name: z.string(),
@@ -42,11 +43,13 @@ const formSchema = z.object({
   during: z.string(),
   endDate: z.string(),
   pass: z.string(),
-  image: z.string(),
+  image:  z.string().optional(),
 })
 
 export default function AddMarksheet() {
+  const [uploading, setUploading] = useState(false)
   const router = useRouter()
+  const fileInputRef = useRef(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
@@ -93,6 +96,10 @@ export default function AddMarksheet() {
       })
     }
   }
+
+
+
+  
 
   return (
     <Card className="max-w-2xl">
@@ -379,10 +386,10 @@ export default function AddMarksheet() {
                 </Field>
               )}
             />
-            <Controller
+<Controller
   name="image"
   control={form.control}
-  render={({ field }) => (
+  render={() => (
     <div>
       <label>Photo</label>
 
@@ -393,20 +400,50 @@ export default function AddMarksheet() {
           const file = e.target.files?.[0]
           if (!file) return
 
-          const formData = new FormData()
-          formData.append("file", file)
+          console.log("FILE:", file)
 
-          // 🔥 upload to Linux server
-          const res = await fetch("https://itces.in/upload.php", {
-            method: "POST",
-            body: formData,
-          })
+          setUploading(true)
 
-          const data = await res.json()
+          try {
+            const formData = new FormData()
+            formData.append("file", file)
 
-          field.onChange(data.url) // ✅ DB me URL save
+            const res = await fetch("https://itces.in/upload.php", {
+              method: "POST",
+              body: formData,
+            })
+
+            console.log("STATUS:", res.status)
+
+            const data = await res.json()
+            console.log("RESPONSE:", data)
+
+            if (!res.ok) {
+              throw new Error(data.error || "Upload failed")
+            }
+
+            // ✅ set value in form
+            form.setValue("image", data.url, {
+              shouldValidate: true,
+              shouldDirty: true,
+            })
+
+          } catch (err) {
+            console.error("UPLOAD ERROR:", err)
+            alert("Upload failed")
+          } finally {
+            setUploading(false)
+          }
         }}
       />
+
+      {/* Preview */}
+      {form.watch("image") && (
+        <img
+          src={form.watch("image")}
+          className="mt-2 w-20 h-20 rounded object-cover"
+        />
+      )}
     </div>
   )}
 />
@@ -418,8 +455,8 @@ export default function AddMarksheet() {
           <Button type="button" variant="outline" onClick={() => form.reset()}>
             Reset
           </Button>
-          <Button type="submit" form="form-rhf-demo">
-            Submit
+          <Button type="submit" form="form-rhf-demo" disabled={uploading}>
+         {uploading ? "Uploading..." : "Submit"}
           </Button>
         </Field>
       </CardFooter>
