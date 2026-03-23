@@ -1,5 +1,5 @@
 "use client"
-
+import { IconContext } from "react-icons";
 import { AppSidebar } from "@/components/app-sidebar"
 import {
   Breadcrumb,
@@ -19,6 +19,7 @@ import {
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { usePathname } from "next/navigation"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 export default function DashboardLayout({
   children,
@@ -81,7 +82,7 @@ export default function DashboardLayout({
 
         {/* 🔥 Dynamic content */}
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          {children}
+          <TooltipProvider><IconContext.Provider value={{ size: "10" }}>{children}</IconContext.Provider></TooltipProvider>
         </div>
       </SidebarInset>
     </SidebarProvider>

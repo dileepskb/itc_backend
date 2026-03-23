@@ -6,6 +6,9 @@ export async function GET() {
     include: {
       student: true,
     },
+    orderBy: [
+       { id: 'desc' },  // Primary sort by age ascending
+    ],
   })
   return NextResponse.json(data)
 }

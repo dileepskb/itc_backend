@@ -4,9 +4,10 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
 
+    console.log(body)
     // 🔥 student find
     const student = await prisma.student.findUnique({
-      where: { roll: body.roll }
+      where: { id: body.studentId }
     })
 
     if (!student) {
@@ -16,18 +17,16 @@ export async function POST(req: Request) {
       )
     }
 
-    const marksheet = await prisma.marksheet.upsert({
-      where: { roll: body.roll },
-      update: {},
-      create: {
-        roll: body.roll,
+    const marksheet = await prisma.marksheet.create({
+      data: {
+        roll: student.roll,
         title: body.title,
-        com: body.com,
-        ms: body.ms,
-        accounting: body.accounting,
-        dtp: body.dtp,
-        it: body.it,
-        studentId: student.id
+        com: Number(body.com),
+        ms:  Number(body.ms),
+        accounting:  Number(body.accounting),
+        dtp:  Number(body.dtp),
+        it:  Number(body.it),
+        studentId:  Number(student.id)
       }
     })
 

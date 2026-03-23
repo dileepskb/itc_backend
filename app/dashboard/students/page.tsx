@@ -13,30 +13,62 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { useRouter } from "next/navigation"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { FaRegEdit } from "react-icons/fa"
+import { FaEye } from "react-icons/fa"
+import { MdDelete } from "react-icons/md"
 export default function Page() {
   const [students, setStudents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-    const router = useRouter()
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        setIsLoading(true)
+  
+  const router = useRouter()
 
-        const res = await axios.get("/api/students/")
+// 🔥 fetch function
+  const fetchStudents = async () => {
+    try {
+      setIsLoading(true)
 
-        setStudents(res.data)
-        setError("")
-      } catch (err) {
-        setError("Failed to fetch student details")
-      } finally {
-        setIsLoading(false)
-      }
+      const res = await axios.get("/api/students/")
+      setStudents(res.data)
+      setError("")
+    } catch (err) {
+      setError("Failed to fetch student details")
+    } finally {
+      setIsLoading(false)
     }
+  }
 
+  // 🔥 load on mount
+  useEffect(() => {
     fetchStudents()
   }, [])
+
+  // 🔥 delete function
+  const handleDelete = async (id: number) => {
+    const confirmDelete = confirm("Are you sure?")
+    if (!confirmDelete) return
+
+    try {
+      const res = await fetch(`/api/students/delete/${id}`, {
+        method: "DELETE",
+      })
+
+      if (res.ok) {
+        // ⚡ instant UI update (best UX)
+        setStudents((prev) => prev.filter((s) => s.id !== id))
+      } else {
+        alert("Delete failed")
+      }
+    } catch (err) {
+      alert("Something went wrong")
+    }
+  }
 
   // 🔥 Loading UI
   if (isLoading) return <div>Loading...</div>
@@ -46,12 +78,14 @@ export default function Page() {
 
   return (
     <div>
-        <div className="border p-3">
-            <ButtonGroup>
-               <Button onClick={() => router.push("/dashboard/students/add/")}>Add Student</Button>
-               <Button>Search</Button>
-            </ButtonGroup>
-        </div>
+      <div className="border p-3">
+        <ButtonGroup>
+          <Button onClick={() => router.push("/dashboard/students/add/")}>
+            Add Student
+          </Button>
+          <Button>Search</Button>
+        </ButtonGroup>
+      </div>
       <Table>
         <TableCaption>A list of your recent invoices.</TableCaption>
         <TableHeader>
@@ -69,8 +103,38 @@ export default function Page() {
               <TableCell>{student.roll}</TableCell>
               <TableCell>{student.course}</TableCell>
               <TableCell className="text-right">
-                <Button>Edit</Button>
-                <Button className="bg-red-600">View</Button>
+                <Tooltip>
+                  <TooltipTrigger>
+                    {" "}
+                    <Button className="border bg-gray-200 text-black">
+                      <FaRegEdit />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Edit</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger>
+                    {" "}
+                    <Button className="border bg-gray-200 text-black">
+                      <FaEye />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>View</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button onClick={() => handleDelete(student.id)} className="border bg-gray-200 text-black">
+                      <MdDelete />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
             </TableRow>
           ))}

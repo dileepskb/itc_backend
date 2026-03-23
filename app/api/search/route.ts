@@ -9,27 +9,25 @@ export async function GET(req: Request) {
     return NextResponse.json([])
   }
 
+
+  console.log(query)
+
+  const cleanQuery = query.trim()
   const students = await prisma.student.findMany({
     where: {
       OR: [
         {
           name: {
-            contains: query,
+            contains: cleanQuery,
             mode: "insensitive",
           },
         },
         {
           roll: {
-            contains: query,
+            contains: cleanQuery,
             mode: "insensitive",
           },
-        },
-        {
-          course: {
-            contains: query,
-            mode: "insensitive",
-          },
-        },
+        }
       ],
     },
     take: 10, // 🔥 limit results

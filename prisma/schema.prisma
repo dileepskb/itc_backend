@@ -45,7 +45,7 @@ model Student {
   pass      String?
   image     String?   // base64 or URL
 
-  marksheet Marksheet?
+  marksheet Marksheet[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -54,7 +54,7 @@ model Student {
 model Marksheet {
   id          Int     @id @default(autoincrement())
   title       String?
-  roll        String  @unique
+  roll        String 
 
   com         Int?
   ms          Int?
@@ -62,7 +62,7 @@ model Marksheet {
   dtp         Int?
   it          Int?
 
-  studentId   Int     @unique
+  studentId   Int     
   student     Student @relation(fields: [studentId], references: [id])
 
   createdAt   DateTime @default(now())

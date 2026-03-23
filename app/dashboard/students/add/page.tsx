@@ -5,12 +5,19 @@ import * as React from "react"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import * as z from "zod"
-
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
+import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
+
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -22,64 +29,70 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { useEffect, useState } from "react"
-import axios from "axios"
+import { useRouter } from "next/navigation"
 
 const formSchema = z.object({
-  title: z.string(),
+  name: z.string(),
   roll: z.string(),
-  com: z.string(),
-  ms: z.string(),
-  accounting: z.string(),
-  dtp: z.string(),
-  it: z.string(),
-  studentId: z.string(),
+  course: z.string(),
+  so: z.string(),
+  session: z.string(),
+  issue: z.string(),
+  birth: z.string(),
+  during: z.string(),
+  endDate: z.string(),
+  pass: z.string(),
+  image: z.string(),
 })
 
 export default function AddMarksheet() {
-  const [query, setQuery] = useState("")
-  const [results, setResults] = useState<string[]>([])
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
-      title: "",
+      name: "",
       roll: "",
-      com: "",
-      ms: "",
-      accounting: "",
-      dtp: "",
-      it: "",
-      studentId: "",
+      course: "",
+      so: "",
+      session: "",
+      issue: "",
+      birth: "",
+      during: "",
+      endDate: "",
+      pass: "",
+      image: "",
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    toast("You submitted the following values:", {
-      description: (
-        <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-      position: "bottom-right",
-      classNames: {
-        content: "flex flex-col gap-2",
-      },
-      style: {
-        "--border-radius": "calc(var(--radius)  + 4px)",
-      } as React.CSSProperties,
-    })
+  async function onSubmit(data: any) {
+    try {
+      const res = await fetch("/api/students/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+
+      const result = await res.json()
+
+      if (!res.ok) {
+        throw new Error(result.error || "Failed to save")
+      }
+
+      // ✅ Success toast
+      toast("Student created successfully 🎉", {
+        position: "bottom-right",
+      })
+      router.push("/dashboard/students/")
+    } catch (error: any) {
+      // ❌ Error toast
+      toast("Error", {
+        description: error.message,
+        position: "bottom-right",
+      })
+    }
   }
-
-  useEffect(() => {
-    const delayDebounce = setTimeout(async () => {
-      if (!query) return
-
-      const res = await axios.get(`/api/search?q=${query}`)
-      setResults(res.data)
-    }, 400)
-
-    return () => clearTimeout(delayDebounce)
-  }, [query])
 
   return (
     <Card className="max-w-2xl">
@@ -90,53 +103,14 @@ export default function AddMarksheet() {
         </CardDescription> */}
       </CardHeader>
       <CardContent>
-        <form id="form-rhf-demo" className="flex gap-2" onSubmit={form.handleSubmit(onSubmit)}>
+        <form
+          id="form-rhf-demo"
+          className="flex gap-2"
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
           <FieldGroup>
             <Controller
-              name="studentId"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <div className="relative">
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Student</FieldLabel>
-
-                    <Input
-                      value={query}
-                      onChange={(e) => {
-                        setQuery(e.target.value)
-                      }}
-                      placeholder="Search student..."
-                      autoComplete="off"
-                    />
-
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-
-                  {/* 🔥 Dropdown */}
-                  {query && results.length > 0 && (
-                    <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded border bg-white shadow">
-                      {results.map((student: any) => (
-                        <div
-                          key={student.id}
-                          className="cursor-pointer p-2 hover:bg-gray-100"
-                          onClick={() => {
-                            field.onChange(student.id) // ✅ form me id set
-                            setQuery(student.name) // ✅ input me name show
-                            setResults([]) // ✅ dropdown close
-                          }}
-                        >
-                          {student.name} ({student.roll})
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            />
-            <Controller
-              name="title"
+              name="name"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
@@ -145,7 +119,7 @@ export default function AddMarksheet() {
                     {...field}
                     id="form-rhf-demo-title"
                     aria-invalid={fieldState.invalid}
-                    placeholder="Title"
+                    placeholder="Name"
                     autoComplete="off"
                   />
                   {fieldState.invalid && (
@@ -174,16 +148,16 @@ export default function AddMarksheet() {
               )}
             />
             <Controller
-              name="com"
+              name="course"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="form-rhf-demo-title">COM</FieldLabel>
+                  <FieldLabel htmlFor="form-rhf-demo-title">Course</FieldLabel>
                   <Input
                     {...field}
                     id="form-rhf-demo-title"
                     aria-invalid={fieldState.invalid}
-                    placeholder="COM"
+                    placeholder="Course"
                     autoComplete="off"
                   />
                   {fieldState.invalid && (
@@ -192,26 +166,84 @@ export default function AddMarksheet() {
                 </Field>
               )}
             />
-            
+            <Controller
+              name="so"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-demo-title">S/O</FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-title"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="S/O"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              name="session"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-demo-title">Session</FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-title"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Session"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
           </FieldGroup>
           <FieldGroup>
-          
-          
-           
-           
-            <Controller
-              name="ms"
+            
+             <Controller
+              name="issue"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="form-rhf-demo-title">MS</FieldLabel>
-                  <Input
-                    {...field}
-                    id="form-rhf-demo-title"
-                    aria-invalid={fieldState.invalid}
-                    placeholder="MS"
-                    autoComplete="off"
-                  />
+                  <FieldLabel>Issue</FieldLabel>
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        {field.value ? (
+                          format(new Date(field.value), "dd-MM-yyyy")
+                        ) : (
+                          <span>Select date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        onSelect={(date) => {
+                          field.onChange(date) // 🔥 set form value
+                        }}
+      className="rounded-lg border"
+      captionLayout="dropdown"
+                      />
+                    </PopoverContent>
+                  </Popover>
+
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -219,18 +251,42 @@ export default function AddMarksheet() {
               )}
             />
             <Controller
-              name="dtp"
+              name="birth"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="form-rhf-demo-title">DTP</FieldLabel>
-                  <Input
-                    {...field}
-                    id="form-rhf-demo-title"
-                    aria-invalid={fieldState.invalid}
-                    placeholder="DTP"
-                    autoComplete="off"
-                  />
+                  <FieldLabel>Birth</FieldLabel>
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        {field.value ? (
+                          format(new Date(field.value), "dd-MM-yyyy")
+                        ) : (
+                          <span>Select date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        onSelect={(date) => {
+                          field.onChange(date) // 🔥 set form value
+                        }}
+      className="rounded-lg border"
+      captionLayout="dropdown"
+                      />
+                    </PopoverContent>
+                  </Popover>
+
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -238,24 +294,122 @@ export default function AddMarksheet() {
               )}
             />
             <Controller
-              name="it"
+              name="endDate"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="form-rhf-demo-title">IT</FieldLabel>
-                  <Input
-                    {...field}
-                    id="form-rhf-demo-title"
-                    aria-invalid={fieldState.invalid}
-                    placeholder="IT"
-                    autoComplete="off"
-                  />
+                  <FieldLabel>endData</FieldLabel>
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        {field.value ? (
+                          format(new Date(field.value), "dd-MM-yyyy")
+                        ) : (
+                          <span>Select date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        onSelect={(date) => {
+                          field.onChange(date) // 🔥 set form value
+                        }}
+      className="rounded-lg border"
+      captionLayout="dropdown"
+                      />
+                    </PopoverContent>
+                  </Popover>
+
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
                 </Field>
               )}
             />
+             <Controller
+              name="pass"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Pass</FieldLabel>
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        {field.value ? (
+                          format(new Date(field.value), "dd-MM-yyyy")
+                        ) : (
+                          <span>Select date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        onSelect={(date) => {
+                          field.onChange(date) // 🔥 set form value
+                        }}
+      className="rounded-lg border"
+      captionLayout="dropdown"
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+  name="image"
+  control={form.control}
+  render={({ field }) => (
+    <div>
+      <label>Photo</label>
+
+      <input
+        type="file"
+        accept="image/*"
+        onChange={async (e) => {
+          const file = e.target.files?.[0]
+          if (!file) return
+
+          const formData = new FormData()
+          formData.append("file", file)
+
+          // 🔥 upload to Linux server
+          const res = await fetch("https://itces.in/upload.php", {
+            method: "POST",
+            body: formData,
+          })
+
+          const data = await res.json()
+
+          field.onChange(data.url) // ✅ DB me URL save
+        }}
+      />
+    </div>
+  )}
+/>
           </FieldGroup>
         </form>
       </CardContent>

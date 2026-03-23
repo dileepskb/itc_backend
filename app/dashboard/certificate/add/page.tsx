@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { useEffect, useState } from "react"
 import axios from "axios"
+import { useRouter } from "next/navigation"
 
 const formSchema = z.object({
   title: z.string(),
@@ -39,6 +40,7 @@ const formSchema = z.object({
 export default function AddMarksheet() {
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<string[]>([])
+    const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
@@ -53,22 +55,36 @@ export default function AddMarksheet() {
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    toast("You submitted the following values:", {
-      description: (
-        <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-      position: "bottom-right",
-      classNames: {
-        content: "flex flex-col gap-2",
+async function onSubmit(data: any) {
+  try {
+    const res = await fetch("/api/marksheet/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-      style: {
-        "--border-radius": "calc(var(--radius)  + 4px)",
-      } as React.CSSProperties,
+      body: JSON.stringify(data),
+    })
+
+    const result = await res.json()
+
+    if (!res.ok) {
+      throw new Error(result.error || "Failed to save")
+    }
+    
+    // ✅ Success toast
+    toast("Marksheet created successfully 🎉", {
+      position: "bottom-right",
+    })
+    router.push("/dashboard/certificate/")
+
+  } catch (error: any) {
+    // ❌ Error toast
+    toast("Error", {
+      description: error.message,
+      position: "bottom-right",
     })
   }
+}
 
   useEffect(() => {
     const delayDebounce = setTimeout(async () => {
