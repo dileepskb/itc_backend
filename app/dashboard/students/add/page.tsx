@@ -305,7 +305,26 @@ export default function AddMarksheet() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>endData</FieldLabel>
+                  <FieldLabel htmlFor="form-rhf-demo-title">Start Date to End Date</FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-title"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Start Date to End Date"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            {/* <Controller
+              name="endDate"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>During</FieldLabel>
 
                   <Popover>
                     <PopoverTrigger asChild>
@@ -342,7 +361,7 @@ export default function AddMarksheet() {
                   )}
                 </Field>
               )}
-            />
+            /> */}
              <Controller
               name="pass"
               control={form.control}
