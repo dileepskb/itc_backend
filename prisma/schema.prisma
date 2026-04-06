@@ -44,6 +44,7 @@ model Student {
   endDate   String?
   pass      String?
   image     String?   // base64 or URL
+  student   String?
 
   marksheet Marksheet[]
 

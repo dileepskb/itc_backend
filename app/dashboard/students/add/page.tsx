@@ -38,6 +38,7 @@ const formSchema = z.object({
   course: z.string(),
   so: z.string(),
   session: z.string(),
+  studycentre: z.string(),
   issue: z.string(),
   birth: z.string(),
   during: z.string(),
@@ -58,6 +59,7 @@ export default function AddMarksheet() {
       course: "",
       so: "",
       session: "",
+      studycentre: "",
       issue: "",
       birth: "",
       during: "",
@@ -203,6 +205,25 @@ export default function AddMarksheet() {
                     id="form-rhf-demo-title"
                     aria-invalid={fieldState.invalid}
                     placeholder="Session"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              name="studycentre"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-demo-title">Study Centre</FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-title"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Study Centre"
                     autoComplete="off"
                   />
                   {fieldState.invalid && (

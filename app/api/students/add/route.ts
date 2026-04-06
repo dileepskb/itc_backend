@@ -14,6 +14,7 @@ export async function POST(req: Request) {
         course: body.course,
         so: body.so,
         session: body.session,
+        studycentre: body.studycentre,
         issue: body.issue,
         birth: body.birth,
         during: body.during,
