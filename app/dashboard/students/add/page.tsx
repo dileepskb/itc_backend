@@ -29,8 +29,8 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { useRouter } from "next/navigation"
-import { useRef, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
 
 const formSchema = z.object({
   name: z.string(),
@@ -70,34 +70,64 @@ export default function AddMarksheet() {
   })
 
   async function onSubmit(data: any) {
-    try {
-      const res = await fetch("/api/students/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      })
+  try {
 
-      const result = await res.json()
+    const editId = searchParams.get("edit");
 
-      if (!res.ok) {
-        throw new Error(result.error || "Failed to save")
-      }
+    const url = editId
+      ? `/api/students/edit/${editId}`
+      : "/api/students/add";
 
-      // ✅ Success toast
-      toast("Student created successfully 🎉", {
-        position: "bottom-right",
-      })
-      router.push("/dashboard/students/")
-    } catch (error: any) {
-      // ❌ Error toast
-      toast("Error", {
-        description: error.message,
-        position: "bottom-right",
-      })
+    const method = editId ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.error || "Failed");
     }
+
+    toast(
+      editId
+        ? "Student updated successfully 🎉"
+        : "Student created successfully 🎉",
+      {
+        position: "bottom-right",
+      }
+    );
+
+    router.push("/dashboard/students");
+  } catch (error: any) {
+    toast("Error", {
+      description: error.message,
+      position: "bottom-right",
+    });
   }
+}
+
+
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const id = searchParams.get("edit");
+
+    if (id) {
+      fetch(`/api/students/edit/${id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          form.reset(data?.student);
+        });
+    }
+  }, [searchParams]);
 
 
 
@@ -322,7 +352,7 @@ export default function AddMarksheet() {
               )}
             />
             <Controller
-              name="endDate"
+              name="during"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>

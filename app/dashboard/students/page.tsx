@@ -70,6 +70,11 @@ export default function Page() {
     }
   }
 
+
+  const handleEdit = (id: number) => {
+          router.push(`/dashboard/students/add?edit=${id}`)
+  }
+
   // 🔥 Loading UI
   if (isLoading) return <div>Loading...</div>
 
@@ -106,7 +111,7 @@ export default function Page() {
                 <Tooltip>
                   <TooltipTrigger>
                     {" "}
-                    <Button className="border bg-gray-200 text-black">
+                    <Button onClick={() => handleEdit(student.id)} className="border bg-gray-200 text-black">
                       <FaRegEdit />
                     </Button>
                   </TooltipTrigger>
