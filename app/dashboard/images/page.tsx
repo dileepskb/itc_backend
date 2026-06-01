@@ -8,6 +8,7 @@ interface GalleryImage {
   url: string;
 }
 
+
 export default function GalleryPage() {
   const [file, setFile] = useState<File | null>(null);
   const [images, setImages] = useState<GalleryImage[]>([]);
@@ -56,6 +57,9 @@ useEffect(() => {
     setLoading(false);
   };
 
+
+console.log(images)
+
   return (
     <div className="max-w-5xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-5">
@@ -92,12 +96,12 @@ useEffect(() => {
         </thead>
 
         <tbody>
-          {images.map((img) => (
-            <tr key={img.name}>
+          {images.map((img:any, index) => (
+            <tr key={index}>
               <td className="border p-2">
                 <Image
-                  src={img.url}
-                  alt={img.name}
+                  src={img.imageUrl}
+                  alt={img.id}
                   width={80}
                   height={80}
                   className="rounded"

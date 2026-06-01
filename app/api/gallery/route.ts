@@ -67,10 +67,7 @@ export async function GET() {
 
     const files = await fs.readdir(uploadDir);
 
-    const images = files.map((file) => ({
-      name: file,
-      url: `/uploads/${file}`,
-    }));
+    const images = await prisma.gallery.findMany()
 
     return NextResponse.json(images);
   } catch (error) {
