@@ -69,3 +69,11 @@ model Marksheet {
 
   createdAt DateTime @default(now())
 }
+
+
+
+model Gallery {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  createdAt DateTime @default(now())
+}
